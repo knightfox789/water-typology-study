@@ -30,12 +30,12 @@ required_csp = {
 }
 
 secret_patterns = {
-    "GitHub token": re.compile(r"\\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\\b"),
-    "AWS access key": re.compile(r"\\bAKIA[0-9A-Z]{16}\\b"),
+    "GitHub token": re.compile(r"\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b"),
+    "AWS access key": re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
     "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
     "generic API key assignment": re.compile(
-        r"""(?ix)\\b(?:api[_-]?key|client[_-]?secret|access[_-]?token)\\b
-            \\s*[:=]\\s*["'][A-Za-z0-9._~+/=-]{16,}["']"""
+        r"""(?ix)\b(?:api[_-]?key|client[_-]?secret|access[_-]?token)\b
+            \s*[:=]\s*["'][A-Za-z0-9._~+/=-]{16,}["']"""
     ),
 }
 
@@ -43,7 +43,7 @@ for path in data_files:
     text = path.read_text(encoding="utf-8")
     if re.search(r"</script", text, re.IGNORECASE):
         error(path, "contains '</script', which can break out of embedded script data")
-    if re.search(r"javascript\\s*:", text, re.IGNORECASE):
+    if re.search(r"javascript\s*:", text, re.IGNORECASE):
         error(path, "contains a javascript: URL")
     for label, pattern in secret_patterns.items():
         if pattern.search(text):
@@ -53,7 +53,7 @@ for path in html_files:
     text = path.read_text(encoding="utf-8")
 
     csp_match = re.search(
-        r'<meta\\s+http-equiv=["\\']Content-Security-Policy["\\']\\s+content=["\\']([^"\\']+)["\\']',
+        r"""<meta\s+http-equiv=["']Content-Security-Policy["']\s+content=["']([^"']+)["']""",
         text,
         re.IGNORECASE,
     )
@@ -67,13 +67,13 @@ for path in html_files:
         if "'unsafe-inline'" in csp:
             warning(path, "CSP still permits 'unsafe-inline'; keep this until inline JS/CSS is externalized")
 
-    if re.search(r'<script\\b[^>]*\\bsrc\\s*=\\s*["\\']https?://', text, re.IGNORECASE):
+    if re.search(r"""<script\b[^>]*\bsrc\s*=\s*["']https?://""", text, re.IGNORECASE):
         error(path, "loads runtime JavaScript from an external origin")
-    if re.search(r"javascript\\s*:", text, re.IGNORECASE):
+    if re.search(r"javascript\s*:", text, re.IGNORECASE):
         error(path, "contains a javascript: URL")
 
-    for tag in re.findall(r"<a\\b[^>]*\\btarget\\s*=\\s*[\\\"']_blank[\\\"'][^>]*>", text, re.IGNORECASE):
-        rel = re.search(r"\\brel\\s*=\\s*[\\\"']([^\\\"']*)[\\\"']", tag, re.IGNORECASE)
+    for tag in re.findall(r"""<a\b[^>]*\btarget\s*=\s*["']_blank["'][^>]*>""", text, re.IGNORECASE):
+        rel = re.search(r"""\brel\s*=\s*["']([^"']*)["']""", tag, re.IGNORECASE)
         if not rel or "noopener" not in rel.group(1).lower().split():
             error(path, "target=_blank link is missing rel=noopener")
 
