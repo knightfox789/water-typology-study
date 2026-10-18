@@ -1151,7 +1151,8 @@ body.is-explorer .foot { display: none; }
 
   // Arriving at a section (e.g. the explorer's "Research team" link): the tour and the flowchart
   // are built after the browser's first jump, so jump again, without the smooth scroll.
-  const arrive = location.hash && location.hash !== "#explorer" && document.querySelector(location.hash);
+  const arriveId = location.hash && location.hash !== "#explorer" ? location.hash.slice(1) : "";
+  const arrive = arriveId && document.getElementById(arriveId);
   if (arrive) {
     const root = document.documentElement;
     root.style.scrollBehavior = "auto";
