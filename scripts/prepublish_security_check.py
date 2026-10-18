@@ -53,18 +53,18 @@ for path in html_files:
     text = path.read_text(encoding="utf-8")
 
     csp_match = re.search(
-        r"""<meta\s+http-equiv=["']Content-Security-Policy["']\s+content=["']([^"']+)["']""",
+        r"""<meta\s+http-equiv=["']Content-Security-Policy["'][^>]*>""",
         text,
         re.IGNORECASE,
     )
     if not csp_match:
         error(path, "missing Content-Security-Policy meta tag")
     else:
-        csp = csp_match.group(1)
+        csp_tag = csp_match.group(0)
         for directive in required_csp[path.name]:
-            if directive not in csp:
+            if directive not in csp_tag:
                 error(path, f"CSP is missing {directive!r}")
-        if "'unsafe-inline'" in csp:
+        if "'unsafe-inline'" in csp_tag:
             warning(path, "CSP still permits 'unsafe-inline'; keep this until inline JS/CSS is externalized")
 
     if re.search(r"""<script\b[^>]*\bsrc\s*=\s*["']https?://""", text, re.IGNORECASE):
