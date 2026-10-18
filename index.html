@@ -382,7 +382,7 @@ body.is-explorer .foot { display: none; }
 @media (max-width: 760px) {
   .flow__fig { padding: 16px; }
   .flow__links { display: none; }
-  .flow__cols { grid-template-columns: 1fr; gap: 18px; }
+  .flow__cols { grid-template-columns: minmax(0, 1fr); gap: 18px; }   /* an open note's table must not widen the column */
   .fcol__h { margin-bottom: 8px; }
   .fcol__list { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; gap: 8px; }
   .fnode { width: auto; }

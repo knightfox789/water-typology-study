@@ -1202,16 +1202,8 @@ html[data-embedded] .masthead { display: none; }
 em, i, .legend .legnote, .results .via, .provlimh { font-style: normal; }
 em { color: var(--ink-faint); }
 
-/* ---------- Stage 8: smallest labels readable on phones (no label under 12 px) ---------- */
-@media (max-width: 520px) {
-  .ctrlab, .whygrid h2, .filters label, .listhead, .hlab .scen, .depthrows span,
-  .fwdiff, .recs dt, .gloss, .gloss b, .cglabel, .legend .n { font-size: 12px; }
-  .figq { font-size: 12px; }
-}
-
-
-
-/* ---------- typography consistency pass ---------- */
+/* ---------- typography consistency pass (2026-10-18):
+   the explorer's reading text in the story's serif; labels 11.5 px on larger screens ---------- */
 body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -1284,6 +1276,16 @@ blockquote.named span,
   .recs dd,
   blockquote.named { font-size: 1rem; }
 }
+
+/* ---------- Stage 8: smallest labels readable on phones (no label under 12 px) ---------- */
+@media (max-width: 520px) {
+  .ctrlab, .whygrid h2, .filters label, .listhead, .hlab .scen, .depthrows span,
+  .fwdiff, .recs dt, .gloss, .gloss b, .cglabel, .legend .n,
+  blockquote.named span, .provmeta dt, .provlimh { font-size: 12px; }
+  .figq { font-size: 12px; }
+}
+
+
 </style>
 </head>
 <body>

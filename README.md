@@ -12,6 +12,8 @@ Foundation).
   study's recommendations, with the source and year of every figure and a one-page brief
   to print.
 - `data/` — the figures behind the pages, as JSON.
+- `assets/social-preview.png` — the picture shown when a link to the site is shared.
+- `robots.txt`, `sitemap.xml` — help search engines find the two pages.
 
 **Live site:** https://knightfox789.github.io/water-typology-study/
 
