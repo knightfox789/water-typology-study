@@ -1,0 +1,20 @@
+Gujarat water typology: an interactive edition of
+"Building Informed and Scalable Water Security Solutions for Gujarat"
+(Development Support Centre, Ahmedabad, 2023)
+
+The text, figures and data files of this interactive edition (index.html,
+explorer.html, standalone.html and data/*.json) are shared under the
+Creative Commons Attribution 4.0 International licence (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
+
+You may copy, adapt and share them, as long as you credit the study:
+
+  Development Support Centre (2023). Building Informed and Scalable Water
+  Security Solutions for Gujarat. Ahmedabad: Development Support Centre.
+
+and say if you changed anything.
+
+The typefaces Rasa (Rosetta) and Anek Gujarati (Ek Type) are embedded in the
+pages under the SIL Open Font License 1.1; the licence texts are in fonts/.
+
+Designed by Kaushal Gadariya.

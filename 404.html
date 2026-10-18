@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2.5C16 2.5 6 14.6 6 20.6a10 10 0 0 0 20 0C26 14.6 16 2.5 16 2.5z' fill='%23117B7B'/%3E%3Cpath d='M10.5 21.5a5.5 5.5 0 0 0 5.5 5' fill='none' stroke='%23F4F6F5' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>Page not found · Gujarat water typology</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { --ink: #0B1F33; --canal: #117B7B; --canal-deep: #0C5F5F; --paper: #F4F6F5; --silt: #56656E; }
+  html { background: var(--paper); }
+  body { margin: 0; font: 1.0625rem/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: var(--paper); }
+  main { max-width: 36rem; margin: 0 auto; padding: 18vh 16px 64px; }
+  .mark { margin: 0 0 6px; font: 600 1.125rem/1.2 Georgia, "Times New Roman", serif; }
+  .sub { margin: 0 0 40px; color: var(--silt); font-size: .9375rem; }
+  h1 { margin: 0 0 12px; font: 500 2.25rem/1.1 Georgia, "Times New Roman", serif; }
+  p { margin: 0 0 24px; }
+  .go { display: flex; flex-wrap: wrap; gap: 12px; }
+  .go a { display: inline-block; padding: 11px 18px; border-radius: 6px; font-weight: 600; text-decoration: none; }
+  .go a.main { background: var(--canal); color: #fff; }
+  .go a.main:hover { background: var(--canal-deep); }
+  .go a.alt { border: 1px solid #D3DBDD; color: var(--ink); background: #fff; }
+  .go a:focus-visible { outline: 3px solid var(--canal); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="mark">Gujarat water typology</p>
+  <p class="sub">DSC action research study, 2020–22</p>
+  <h1>Page not found</h1>
+  <p>This address is not part of the site. The story and the district explorer are here:</p>
+  <p class="go"><a class="main" id="to-story" href="/">Read the story</a><a class="alt" id="to-explorer" href="/explorer.html">Open the district explorer</a></p>
+</main>
+<script>
+  (async () => {
+    // On a project site the front page sits one level down (USER.github.io/REPOSITORY/).
+    const seg = location.pathname.split("/").filter(Boolean)[0];
+    let base = "/";
+    if (seg) {
+      try { const r = await fetch("/" + seg + "/explorer.html", { method: "HEAD" }); if (r.ok) base = "/" + seg + "/"; } catch (e) {}
+    }
+    document.getElementById("to-story").href = base;
+    document.getElementById("to-explorer").href = base + "explorer.html";
+  })();
+</script>
+</body>
+</html>
