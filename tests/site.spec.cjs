@@ -4,7 +4,7 @@ const SITE = 'http://127.0.0.1:8123';
 test('Story opens and links to the district Explorer', async ({ page }) => {
   await page.goto(SITE + '/index.html');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Explorer' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Explorer', exact: true })).toBeVisible();
 });
 
 test('Explorer loads all districts and allows keyboard map selection', async ({ page }) => {
