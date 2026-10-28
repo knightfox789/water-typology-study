@@ -67,3 +67,52 @@ test('Mobile Story and Explorer retain navigation and district search', async ({
   await query.press('Enter');
   await expect(page.locator('#card')).toContainText('Kachchh');
 });
+
+test('Explorer filters reset and demand threshold can be restored', async ({ page }) => {
+  await page.goto(SITE + '/explorer.html');
+  const count = page.locator('#lcount');
+  await expect(count).toHaveText('33 districts');
+  await page.locator('#fsupply').selectOption('High');
+  await expect(count).toContainText('of 33 districts match');
+  await page.locator('#fclear').click();
+  await expect(count).toHaveText('33 districts');
+
+  const initial = await page.locator('#thrcount').innerText();
+  const slider = page.locator('#thr');
+  await slider.focus();
+  await slider.press('End');
+  await expect(page.locator('#thrcount')).not.toHaveText(initial);
+  await page.locator('#thrreset').click();
+  await expect(page.locator('#thrcount')).toHaveText(initial);
+});
+
+test('District deep links select the correct card', async ({ page }) => {
+  await page.goto(SITE + '/explorer.html#/dahod');
+  await expect(page.locator('#card')).toContainText('Dahod');
+});
+
+test('Touch selection opens a district card', async ({ browser }) => {
+  const context = await browser.newContext({
+    viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true,
+  });
+  const page = await context.newPage();
+  await page.goto(SITE + '/explorer.html');
+  await page.locator('#q').fill('Surat');
+  await page.locator('#results [role="option"]').first().tap();
+  await expect(page.locator('#card')).toContainText('Surat');
+  await context.close();
+});
+
+test('No document-level horizontal overflow at reference widths', async ({ page }) => {
+  for (const width of [320, 375, 768]) {
+    await page.setViewportSize({ width, height: 812 });
+    for (const url of ['/index.html', '/explorer.html']) {
+      await page.goto(SITE + url);
+      const dimensions = await page.evaluate(() => ({
+        scroll: document.documentElement.scrollWidth,
+        viewport: document.documentElement.clientWidth,
+      }));
+      expect(dimensions.scroll, `${url} at ${width}px`).toBeLessThanOrEqual(dimensions.viewport + 2);
+    }
+  }
+});
