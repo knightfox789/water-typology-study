@@ -1,0 +1,37 @@
+name: Story and Explorer QA
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrity:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate research data (read-only)
+        run: python tests/validate_research_integrity.py
+  browser:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned browser-test tools
+        run: |
+          npm install --no-save @playwright/test@1.56.0
+          npx playwright install --with-deps chromium
+      - name: Start local static site
+        run: |
+          python -m http.server 8123 --bind 127.0.0.1 > /tmp/water-qa-http.log 2>&1 &
+          sleep 2
+      - name: Test both pages in headless Chromium
+        run: npx playwright test tests/site.spec.cjs --browser chromium --workers 1

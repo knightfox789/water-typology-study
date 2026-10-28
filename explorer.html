@@ -1301,6 +1301,10 @@ blockquote.named span,
 }
 
 
+  /* Failure state is kept restrained and consistent with the study layout. */
+  .load-error { border: 1px solid var(--hairline); background: #fff; padding: 16px; margin: 16px 0; }
+  .load-error p { margin: 0 0 12px; }
+  .load-error button { padding: 8px 12px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -1337,12 +1341,18 @@ blockquote.named span,
     <p><span id="count">33</span> districts in seven regions. Search for a district or pick one on the map. The ? beside any figure gives its source, its year and what to keep in mind.</p>
   </section>
 
+  <div id="explorer-load-error" class="load-error" role="alert" hidden>
+    <p><strong>The district explorer could not load.</strong> Please try again. If the problem continues, return to the Story page.</p>
+    <button type="button" id="explorer-retry">Retry loading</button>
+  </div>
+
   <div class="finder">
     <label class="sr" for="q">Find a district</label>
     <input id="q" type="text" autocomplete="off" spellcheck="false"
-           role="combobox" aria-expanded="false" aria-controls="results"
+           role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="results"
            placeholder="Find a district, such as Banaskantha, Kutch or Dohad">
     <ul id="results" class="results" role="listbox" aria-label="Districts" hidden></ul>
+    <p id="search-status" class="sr" role="status" aria-live="polite"></p>
   </div>
 
   <div class="controls">
@@ -1540,20 +1550,26 @@ let openProv = null;               // which provenance row is expanded
 
 /* ---------- data ---------- */
 
+async function fetchJSON(path) {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`Could not load ${path}: HTTP ${response.status}`);
+  return response.json();
+}
+
 async function load() {
   // Inlined by the artifact build; fetched when served as a static site.
   if (window.__DATA__) return window.__DATA__;
   const [geo, att, ind, agr, gw, whs, rec, add, gt, farm] = await Promise.all([
-    fetch("data/districts.geojson").then((r) => r.json()),
-    fetch("data/districts.json").then((r) => r.json()),
-    fetch("data/indicators.json").then((r) => r.json()),
-    fetch("data/agriculture.json").then((r) => r.json()),
-    fetch("data/groundwater.json").then((r) => r.json()),
-    fetch("data/structures.json").then((r) => r.json()),
-    fetch("data/recommendations.json").then((r) => r.json()),
-    fetch("data/crop_additions.json").then((r) => r.json()),
-    fetch("data/ground_truth.json").then((r) => r.json()),
-    fetch("data/farm.json").then((r) => r.json()),
+    fetchJSON("data/districts.geojson"),
+    fetchJSON("data/districts.json"),
+    fetchJSON("data/indicators.json"),
+    fetchJSON("data/agriculture.json"),
+    fetchJSON("data/groundwater.json"),
+    fetchJSON("data/structures.json"),
+    fetchJSON("data/recommendations.json"),
+    fetchJSON("data/crop_additions.json"),
+    fetchJSON("data/ground_truth.json"),
+    fetchJSON("data/farm.json"),
   ]);
   return { geo, att, ind, agr, gw, whs, rec, add, gt, farm };
 }
@@ -3147,8 +3163,13 @@ function search(raw) {
 
 function renderResults(list) {
   const ul = document.getElementById("results");
+  const q = document.getElementById("q");
+  const status = document.getElementById("search-status");
   ul.innerHTML = "";
   cursor = -1;
+  q.setAttribute("aria-expanded", "true");
+  q.removeAttribute("aria-activedescendant");
+  status.textContent = list.length ? `${Math.min(list.length, 8)} district suggestions available.` : "No district by that name.";
   if (!list.length) {
     ul.hidden = false;
     ul.innerHTML = `<li class="noresult" role="presentation">No district by that name.</li>`;
@@ -3158,6 +3179,8 @@ function renderResults(list) {
   list.slice(0, 8).forEach((h) => {
     const li = document.createElement("li");
     li.setAttribute("role", "option");
+    li.id = `district-option-${h.d.id}`;
+    li.setAttribute("aria-selected", "false");
     li.dataset.id = h.d.id;
     const alias = h.via
       ? ` <span class="via">${h.d.aliases.find((a) => norm(a) === h.via) || ""}</span>`
@@ -3166,10 +3189,8 @@ function renderResults(list) {
       `<span class="rid">${String(h.d.id).padStart(2, "0")}</span>` +
       `<span>${h.d.name}</span>${alias}` +
       `<span class="rreg">${h.d.region_name}</span>`;
-    li.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-      pick(h.d.id);
-    });
+    li.addEventListener("mousedown", (e) => e.preventDefault());
+    li.addEventListener("click", () => pick(h.d.id));
     ul.appendChild(li);
   });
 }
@@ -3182,16 +3203,21 @@ function pick(id) {
 
 function closeResults() {
   const ul = document.getElementById("results");
+  const q = document.getElementById("q");
   ul.hidden = true;
   ul.innerHTML = "";
   cursor = -1;
+  q.setAttribute("aria-expanded", "false");
+  q.removeAttribute("aria-activedescendant");
+  document.getElementById("search-status").textContent = "";
 }
 
 function moveCursor(step) {
   const items = [...document.querySelectorAll("#results li[role=option]")];
   if (!items.length) return;
   cursor = (cursor + step + items.length) % items.length;
-  items.forEach((li, i) => li.setAttribute("aria-selected", i === cursor));
+  items.forEach((li, i) => li.setAttribute("aria-selected", String(i === cursor)));
+  document.getElementById("q").setAttribute("aria-activedescendant", items[cursor].id);
   items[cursor].scrollIntoView({ block: "nearest" });
 }
 
@@ -3202,13 +3228,15 @@ function wireSearch() {
     renderResults(search(q.value));
   });
   q.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowDown") { e.preventDefault(); moveCursor(1); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); moveCursor(-1); }
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      if (document.getElementById("results").hidden && q.value.trim()) renderResults(search(q.value));
+      if (!document.getElementById("results").hidden) { e.preventDefault(); moveCursor(e.key === "ArrowDown" ? 1 : -1); }
+    }
     else if (e.key === "Enter") {
       const items = [...document.querySelectorAll("#results li[role=option]")];
       const target = cursor >= 0 ? items[cursor] : items[0];
       if (target) { e.preventDefault(); pick(Number(target.dataset.id)); }
-    } else if (e.key === "Escape") { closeResults(); q.blur(); }
+    } else if (e.key === "Escape") { closeResults(); }
   });
   q.addEventListener("blur", () => setTimeout(closeResults, 120));
 }
@@ -3255,7 +3283,12 @@ function wireSearch() {
   };
   fromHash();
   window.addEventListener("hashchange", fromHash);
-})();
+})().catch((error) => {
+  console.error("District explorer initialization failed:", error);
+  const notice = document.getElementById("explorer-load-error");
+  notice.hidden = false;
+  document.getElementById("explorer-retry").addEventListener("click", () => window.location.reload());
+});
 
 </script>
 </body>
